@@ -29,7 +29,7 @@ comandosBanco = db.cursor();
 ### alterando a tabela para criar uma chave primaria para cada dado que entrar:
 comandosBanco.execute("CREATE TABLE IF NOT EXISTS ocorrencias (id INT AUTO_INCREMENT PRIMARY KEY, tipo VARCHAR(255), assunto VARCHAR(255), descricao VARCHAR(255))")
 
-optionsMenu = 0
+optionsMenu = 0;
 print("Bem vindo ao sistema de ouvidoria da unifacisa. By: Miguelzin ^^")
 while optionsMenu != 4:
     print("1-Criar um ticket.\n2-Listar Ticket\n3-Apagar ticket(s)\n4-Sair.")
@@ -76,13 +76,43 @@ while optionsMenu != 4:
         ### esse comando mostra os dados que estao presentes na nossa tabela - no nosso caso a tabela de ocorrencias: 
         comandosBanco.execute("SELECT * FROM ocorrencias")
         resultados = comandosBanco.fetchall();
-
+        #itera a tabela e mostra os dados presentes em cada linha e coluna:
         for resultado in resultados:
-            print(resultado)
+            print("ID: ",resultado[0],"| Tipo: ",resultado[1],"| Assunto: ",resultado[2],"| Descrição: ",resultado[3])
 
     elif optionsMenu == 3:
         print("Deseja apagar: ")
         print("1-Ticket especifico.\n2-Apagar tudo.")
+        optionsDelete = int(input())
+        if optionsDelete == 1: 
+                comandosBanco.execute("SELECT * FROM ocorrencias")
+                resultados = comandosBanco.fetchall();
+                #itera a tabela e mostra os dados presentes em cada linha e coluna:
+                for resultado in resultados:
+                    print("ID: ",resultado[0],"| Tipo: ",resultado[1],"| Assunto: ",resultado[2],"| Descrição: ",resultado[3])
+                idOcorrencia = int(input("Digite agora o número correspondente ao ID da ocorrencia que deseja apagar: "))
+                # Comando SQL para deletar a ocorrência com base no ID
+                comando_sql = "DELETE FROM ocorrencias WHERE id = %s"
+                dados_para_banco = (idOcorrencia,)
+                # Executar o comando SQL
+                comandosBanco.execute(comando_sql, dados_para_banco)
+                # Salvando alteracoes:
+                db.commit();
+                # essa parte do codigo faz com que a contagem de id da ocorrencia volte para 1 quando recomeçar: 
+                comando_sql_reset = "ALTER TABLE ocorrencias AUTO_INCREMENT = 1"
+                comandosBanco.execute(comando_sql_reset);
+                db.commit();
+                print("Ocorrencia deletada com sucesso!");
+        elif optionsDelete == 2: 
+                print("AVISO: ESSA AÇÃO IRA REMOVER TODAS AS OCORRENCIAS DO SEU BANCO, TEM CERTEZA DISSO?")
+                confirmacaao = input("Se sim, digite: 'sim'. Caso o contrário iremos cancelar por segurança")
+                if confirmacaao == 'sim' : 
+                     comando_sql = "DELETE FROM ocorrencias";
+                     comandosBanco.execute(comando_sql);
+                     db.commit();
+                     print("Todas as ocorrencias foram deletadas com sucesso.")
+                else :
+                     print("operação cancelada por segurança.")
 
     elif optionsMenu == 4:
         print("Obrigado, finalizando seu atendimento. Bye ^^")
